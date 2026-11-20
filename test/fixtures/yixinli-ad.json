@@ -1,0 +1,38 @@
+{
+  "note": "HAR 138_1795138963254.har 中推荐信息流（pageId=PostSquare_Recommend）命中的壹心理广告；原始响应为 gzip+base64 JSON，这里是 prs[0] 的解读用字段。",
+  "captured_at": "2026-11-20T09:43:22.546+08:00",
+  "request": {
+    "method": "POST",
+    "url": "https://ssp.soulapp.cn/api/q?bi=...&bik=32243&pageId=PostSquare_Recommend"
+  },
+  "response": {
+    "code": 200,
+    "data": {
+      "cnt": 1,
+      "prs": [
+        {
+          "ideaId": "7819294",
+          "pid": "0_138000000_66000000_10000000",
+          "cid": 66,
+          "sid": 1,
+          "adOwnerSignature": "壹心理",
+          "maintitle": "真正抑郁是装不出来的，不断放大的情绪，不受控制的躯体化，想知道自己是不是真的抑郁？那就做个抑郁测试吧",
+          "position": 10,
+          "positionType": 1,
+          "renderType": 1,
+          "con": "广告",
+          "ctype": 0,
+          "lt": 3,
+          "ltyp": 1,
+          "opentype": 1,
+          "buttonText": "测测看",
+          "enableButton": 1,
+          "clientBillingMethod": 1,
+          "lp": "https://static.xinli001.com/cp/index.html#/detail/353?channelId=5165&callback=https%3A%2F%2Fad-r.soulapp.cn%2Fapi%2Fv2%2Freport%3Fbody%3DC6X91WHRURKU2Dqiu2j4U6oZTUKmsNGtsSgLfRHo3EfRp5iv5eK3PZn8JDEU3wXkNspGht95cKrTNPpHtCcvMNA3nwxo5bHNFPsABWSammBVWMCKwZUabubnxKjgq7rSUwahtSxoe8izLmNiGvm44LzJHqh2L4zEQbR",
+          "adOwnerPic": "https://soul-ad.soulapp.cn/material/ad-performance-advertiser/prod/image/2025-12-02/0acddf8cb28e4ed09042682b4c66eabc.jpeg",
+          "url": "https://soul-ad.soulapp.cn/material/ad-performance-advertiser/prod/image/2024-05-23/f40bc02e5dc14c43b31651060885f495.jpeg"
+        }
+      ]
+    }
+  }
+}
