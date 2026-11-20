@@ -1,6 +1,6 @@
 # Soul 去广告 Loon 插件
 
-基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
+基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)，当前版本 **v2.2**。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
 
 ## 已实现
 
@@ -25,8 +25,10 @@ soul-loon-ads/                  # https://github.com/27149/soul-loon-ads
 ├── SoulAds.plugin            # 远程脚本版（raw.githubusercontent）
 ├── SoulAds-jsdelivr.plugin   # 远程脚本版（fastly.jsdelivr.net，国内推荐）
 ├── SoulAds-ghproxy.plugin    # 远程脚本版（ghproxy 备用）
-├── SoulAds-v2.1.plugin       # 固定版本 v2.1（tag，内容不变，推荐）
+├── SoulAds-v2.1.plugin       # 旧版固定文件（保留兼容，可忽略）
 ├── SoulAds-local.plugin      # 本地脚本版（script-path 用文件名）
+├── VERSION                   # 当前版本号（v2.2）
+├── v2.2/                     # 版本化脚本目录（插件按版本引用，避免脚本缓存）
 ├── soul-ads-ssp.js           # 开屏/信息流广告 SSP 拦截（请求级短路）
 ├── soul-ads-follow.js        # 关注页顶部推荐人
 ├── soul-ads-feed.js          # 信息流接口兜底
@@ -82,30 +84,26 @@ POST https://ssp.soulapp.cn/api/q?bi=[...]&bik=32243&pageId=<页面>   (gzip -> 
 
 ## 安装
 
-### 方式一：从 GitHub URL 安装（推荐）
+### 方式一：固定 URL 安装（推荐，装一次以后点更新）
 
-Loon → 配置 → 插件 → 右上角 `+` → 从 URL 添加，粘贴下面任意一条：
-
-| 线路 | 插件地址 | 说明 |
-| --- | --- | --- |
-| **jsDelivr 固定版（推荐）** | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@v2.1/SoulAds-v2.1.plugin` | 对应 git tag `v2.1`，不会被 `@main` 的 CDN 缓存拖旧 |
-| jsDelivr 最新版 | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin` | 跟随 main，但 jsDelivr 各节点缓存可能延迟 |
-| GitHub raw（原生） | `https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds.plugin` | 最"GitHub"，但国内网络经常连不上 raw |
-| ghproxy（备用） | `https://ghproxy.net/https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds-ghproxy.plugin` | 第三方加速，不走 CDN 缓存，更新实时 |
-| 本地脚本 | 见"方式二" | 完全不依赖网络拉脚本 |
+| 线路 | 插件地址（固定不变） |
+| --- | --- |
+| **GitHub Pages（推荐）** | `https://27149.github.io/soul-loon-ads/SoulAds.plugin` |
+| ghproxy（备用，实时无 CDN 缓存） | `https://ghproxy.net/https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds-ghproxy.plugin` |
 
 Safari 直接打开：
 
-- `loon://import?plugin=https%3A%2F%2Ffastly.jsdelivr.net%2Fgh%2F27149%2Fsoul-loon-ads%40v2.1%2FSoulAds-v2.1.plugin`
-- `loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2F27149%2Fsoul-loon-ads%2Fmain%2FSoulAds.plugin`
+- `loon://import?plugin=https%3A%2F%2F27149.github.io%2Fsoul-loon-ads%2FSoulAds.plugin`
+- `loon://import?plugin=https%3A%2F%2Fghproxy.net%2Fhttps%3A%2F%2Fraw.githubusercontent.com%2F27149%2Fsoul-loon-ads%2Fmain%2FSoulAds-ghproxy.plugin`
 
-这一版的脚本是远程绝对地址，Loon 会自动拉取，**不需要**再往 iCloud 放文件。只需要：
+安装后：
 
-1. Loon 安装并信任证书，打开 MITM（HTTPS 解密必需）。
-2. 确认 Soul 流量走 Loon（规则模式命中代理，或临时全局代理）。
-3. 更新：raw 线路实时生效；jsDelivr 的 `@main` 有缓存（约 12 小时），脚本改动后可访问 `https://purge.jsdelivr.net/gh/27149/soul-loon-ads@main/` 刷新，或改用 raw。
+1. **更新**：Loon → 配置 → 插件，在条目上点「更新」即可，**地址不变**，不用删了重装。
+2. **确认版本**：插件描述以 `v2.2 ·` 开头（对应 `#!desc`），注释里也有 `# 版本：v2.2`。
+3. **脚本缓存**：脚本放在版本化目录（本次是 `v2.2/`），插件更新后脚本路径也换新，不会读到旧脚本。
+4. GitHub Pages 首次发布可能要 1 分钟左右生效；如果打不开，先换 ghproxy 那条。
 
-> 如果 raw 和 jsDelivr 都访问不了，可以装 `ghproxy` 之类的加速，或改用下面的本地方式。
+> 旧地址（`raw.githubusercontent.com/.../SoulAds.plugin`、jsDelivr `@main`、tag `v2.1`）仍然能用，但不再作为主推；`raw` 在国内经常连不上，jsDelivr `@main` 各节点缓存不一致。
 
 ### 方式二：本地脚本安装（离线/自持）
 
@@ -159,4 +157,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **49 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **51 项全部通过**。

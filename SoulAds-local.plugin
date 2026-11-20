@@ -1,13 +1,13 @@
 #!name=Soul 去广告（开屏/信息流/推荐位/弹窗）（本地脚本）
-#!desc=移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner 与广告/拉活弹窗。
+#!desc=v2.2 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner 与广告/拉活弹窗。
 #!author=zq
 #!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/Soul.png
 #!category=去广告
 #!date=2026-11-20
 #!system=ios
-# 更新：v2.1 补充拦截 post.soulapp.cn/v2/rec/user（顶部「猜你喜欢」推荐用户）
+# 版本：v2.2（2026-11-20）· 新增 v2/rec/user 拦截；安装地址固定，点更新即可升级
 
-# 本地安装：把 SoulAds-local.plugin 和 6 个 .js 一起放进 iCloud Drive/Loon/Script/
+# 本地安装：把 SoulAds-local.plugin 和 v2.2/ 下 6 个 .js 一起放进 iCloud Drive/Loon/Script/
 # 插件里的 script-path 是文件名，Loon 会从本地脚本目录读取
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）

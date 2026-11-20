@@ -457,6 +457,26 @@ console.log("\n[7] 五个插件变体体检");
     "/app/apollo/config",
   ];
 
+  check("版本化脚本目录 v2.2 齐全，且与根目录脚本一致", () => {
+    const dir = path.join(ROOT, "v2.2");
+    assert(fs.existsSync(dir), "缺少 v2.2/ 目录");
+    ["soul-ads-ssp.js", "soul-ads-follow.js", "soul-ads-feed.js", "soul-ads-popup.js", "soul-ads-ops.js", "soul-ads-config.js"].forEach((f) => {
+      assert(fs.existsSync(path.join(dir, f)), "v2.2/ 缺少 " + f);
+      const a = fs.readFileSync(path.join(dir, f));
+      const b = fs.readFileSync(path.join(ROOT, f));
+      assert(a.equals(b), "v2.2/" + f + " 与根目录脚本不一致");
+    });
+  });
+
+  check("主插件描述带版本号 v2.2", () => {
+    const plugin = fs.readFileSync(path.join(ROOT, "SoulAds.plugin"), "utf8");
+    const desc = (plugin.match(/^#!desc=(.+)$/m) || [])[1] || "";
+    assert(desc.indexOf("v2.2") === 0, "SoulAds.plugin 描述不是 v2.2 开头：" + desc.slice(0, 20));
+    const ghp = fs.readFileSync(path.join(ROOT, "SoulAds-ghproxy.plugin"), "utf8");
+    const gdesc = (ghp.match(/^#!desc=(.+)$/m) || [])[1] || "";
+    assert(gdesc.indexOf("v2.2") === 0, "SoulAds-ghproxy.plugin 描述不是 v2.2 开头");
+  });
+
   PLUGINS.forEach((name) => {
     const plugin = fs.readFileSync(path.join(ROOT, name), "utf8");
 
