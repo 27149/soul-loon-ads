@@ -3,6 +3,7 @@
  *
  * 类型：Loon http-response 脚本
  * 命中（同一脚本按 path 分支处理）：
+ *   post.soulapp.cn/v2/rec/user                          顶部「猜你喜欢」推荐用户模块
  *   post.soulapp.cn/post/relationUser/chatRooms          语音房「猜你喜欢」推荐（30 条）
  *   post.soulapp.cn/hot/soul/rank                       热 Soul 榜（话题运营榜）
  *   post.soulapp.cn/post/recSquare/subTabResource       广场子 tab 运营位
@@ -44,6 +45,31 @@
       data.userList = [];
       changed = true;
       note = "语音房推荐";
+    }
+  } else if (/\/v2\/rec\/user$/.test(path)) {
+    // 关注页/推荐页顶部的「猜你喜欢」推荐用户模块：
+    // 抓包里返回 {"position":0}，用户列表可能出现在 userList/users/recUsers 等字段，
+    // position 是插入位置，统一置 -1 让客户端不再插模块。
+    if (Array.isArray(json.data)) {
+      if (json.data.length > 0) {
+        json.data = [];
+        changed = true;
+        note = "推荐用户模块";
+      }
+    } else if (data && typeof data === "object") {
+      var userKeys = ["userList", "users", "recUsers", "recommendUsers", "userInfoList", "list"];
+      for (var uk = 0; uk < userKeys.length; uk++) {
+        var field = userKeys[uk];
+        if (Array.isArray(data[field]) && data[field].length > 0) {
+          data[field] = [];
+          changed = true;
+        }
+      }
+      if (data.position !== -1) {
+        data.position = -1;
+        changed = true;
+      }
+      note = "推荐用户模块";
     }
   } else if (/\/hot\/soul\/rank$/.test(path)) {
     if (Array.isArray(json.data) && json.data.length > 0) {

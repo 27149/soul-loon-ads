@@ -47,14 +47,14 @@
 
   var changed = false;
 
-  if (Array.isArray(data.recUsers) && data.recUsers.length > 0) {
-    data.recUsers = [];
-    changed = true;
-  }
-
-  if (Array.isArray(data.recPosts) && data.recPosts.length > 0) {
-    data.recPosts = [];
-    changed = true;
+  // 关注页顶部推荐人 / 推荐帖：兼容服务端可能使用的几种字段名
+  var recKeys = ["recUsers", "recUserList", "recommendUsers", "recPosts", "recommendPosts"];
+  for (var r = 0; r < recKeys.length; r++) {
+    var k = recKeys[r];
+    if (Array.isArray(data[k]) && data[k].length > 0) {
+      data[k] = [];
+      changed = true;
+    }
   }
 
   if (Array.isArray(data.posts)) {

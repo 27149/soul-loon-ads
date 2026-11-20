@@ -19,7 +19,15 @@
 
 ---
 
-## A. 语音推荐（语音房「猜你喜欢」）
+## A. 语音推荐 / 顶部推荐用户（「猜你喜欢」）
+
+| 项 | 内容 |
+| --- | --- |
+| 接口 | `GET post.soulapp.cn/v2/rec/user?pageId=PostSquare_Recommend&sceneType=2` |
+| 抓包证据 | `{"data":{"position":0}}`，`position` 是推荐用户模块的插入位置；用户列表可能出现在 `data.userList/users/recUsers` 或 `focused.recUsers` |
+| 屏蔽做法 | `position` 置 -1，并清空 `userList/users/recUsers/recommendUsers` 等字段 |
+| 影响 | 关注页/推荐页顶部的「猜你喜欢」推荐用户不再出现 |
+
 
 | 项 | 内容 |
 | --- | --- |
@@ -141,7 +149,7 @@ Meta_AvatarHeadLimitTimeEnd_OverTime_Popup
 
 | 组 | 是否实现 | 备注 |
 | --- | --- | --- |
-| A 语音房推荐 | ✅ | `chatRooms` 的 `userList` 清空 |
+| A 语音房推荐 / 顶部推荐用户 | ✅ | `chatRooms` 的 `userList` 清空；`v2/rec/user` 的 `position` 置 -1 + 清空用户字段 |
 | B 奇遇铃 | 🟡 只清推广弹窗 | `VAS_LoveBell*` / `Social_LoveBellReturnGuideCard` 删；`loveBell/*` 功能接口保留 |
 | C 全页面商业化 banner | ✅ | apollo 开关 + 页面列表 + 广告落地页站 |
 | D 商业化/增长弹窗 | ✅ | 删除 36/95（AD_/UG_/Meta_/商业化 VAS/奇遇铃推广卡） |

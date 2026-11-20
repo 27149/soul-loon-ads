@@ -7,7 +7,8 @@
 | 组 | 内容 | 脚本 |
 | --- | --- | --- |
 | 开屏 + 信息流广告 | `ssp.soulapp.cn/api/q` 全部回空广告（推荐/关注/同城/主页TA + 开屏） | `soul-ads-ssp.js` |
-| 关注页顶部推荐人 | 清空 `/v5/post/focused` 的 `recUsers` / `recPosts` | `soul-ads-follow.js` |
+| 关注页顶部推荐人 | 清空 `/v5/post/focused` 的 `recUsers` / `recPosts`（兼容 `recUserList` 等字段） | `soul-ads-follow.js` |
+| 顶部「猜你喜欢」推荐用户 | `/v2/rec/user` 的 `position` 置 -1，并清空 `userList/users/recUsers` | `soul-ads-ops.js` |
 | 信息流兜底 | 剔除 `postList` 里 `type=AD` / `isAd` / `adInfo` 等广告卡片 | `soul-ads-feed.js` |
 | 弹窗（36/95） | `AD_*` 广告、`UG_*` 增长拉活、`Meta_*` 付费头像、商业化 `VAS_*`、奇遇铃推广卡 | `soul-ads-popup.js` |
 | 语音房推荐 | `post/relationUser/chatRooms` 的 30 条「猜你喜欢」 | `soul-ads-ops.js` |
@@ -65,6 +66,10 @@ POST https://ssp.soulapp.cn/api/q?bi=[...]&bik=32243&pageId=<页面>   (gzip -> 
 
 // GET post.soulapp.cn/post/relationUser/chatRooms?pageId=PostSquare_Follow&pageIndex=1&pageSize=30
 { "data": { "userList": [ { "roomId": 382964351, "subTitle": "猜你喜欢", "roomContentLabel": "交友扩列" } ] } }  // 30 条
+
+// GET post.soulapp.cn/v2/rec/user?pageId=PostSquare_Recommend&sceneType=2
+{ "data": { "position": 0 } }   // 顶部「猜你喜欢」推荐用户的插入位置；用户列表可能在同一响应或 focused.recUsers 里
+```
 ```
 
 ### 弹窗 / 运营位 / banner
@@ -129,6 +134,7 @@ Safari 直接打开（把对应行的地址 URL-encode 即可）：
 ## 可调项（想恢复某一组时）
 
 - **只恢复语音房推荐**：把插件第 5 组正则里的 `post\/relationUser\/chatRooms|` 删掉，或删 `soul-ads-ops.js` 对应分支。
+- **恢复顶部「猜你喜欢」推荐用户**：把第 5 组正则里的 `v2\/rec\/user|` 删掉，或删 `soul-ads-ops.js` 里 `v2/rec/user` 分支。
 - **恢复部分弹窗**：编辑 `soul-ads-popup.js` 顶部的 `REMOVE_PREFIXES`（`AD_`/`UG_`/`META_`）和 `REMOVE_CODES`（精确 bizCode）。例如保留「付费到期提醒」就从 `UG_` 里单独放行 `UG_PaidItemExpireNotice`（需要把前缀判断改成精确列表）。
 - **恢复某个运营位**：从插件第 5 组对应正则里去掉路径，或删 `soul-ads-ops.js` 里那段 `else if`。
 - **恢复商业化 banner**：删掉插件第 6 组里 `api-ucc.soulapp.cn/app/apollo/config` 那一行。
@@ -151,4 +157,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **43 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **45 项全部通过**。

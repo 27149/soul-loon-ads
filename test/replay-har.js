@@ -285,6 +285,28 @@ console.log("\n[5] soul-ads-ops.js  运营位 / 推荐位 / 广场弹窗 / 新�
     assert(out.data.userList.length === 0, "语音房推荐未清空");
   });
 
+  check("顶部「猜你喜欢」推荐用户模块：position 置 -1", () => {
+    const entry = findEntry(entries, "/v2/rec/user");
+    const before = JSON.parse(decodeEntryBody(entry)).data.position;
+    assert(before === 0, "抓包里 position 应为 0，实际 " + before);
+    const out = JSON.parse(call(entry).done.body);
+    assert(out.data.position === -1, "position 未置 -1");
+  });
+
+  check("推荐用户字段（userList/recUsers 等）被清空", () => {
+    const entry = findEntry(entries, "/v2/rec/user");
+    const j = {
+      code: 10001,
+      data: { position: 0, userList: [{ userId: 1 }], recUsers: [{ userId: 2 }], users: [{ userId: 3 }] },
+      success: true,
+    };
+    const out = JSON.parse(call(entry, JSON.stringify(j)).done.body);
+    assert(out.data.userList.length === 0, "userList 未清空");
+    assert(out.data.recUsers.length === 0, "recUsers 未清空");
+    assert(out.data.users.length === 0, "users 未清空");
+    assert(out.data.position === -1, "position 未置 -1");
+  });
+
   check("热 Soul 榜被清空", () => {
     const entry = findEntry(entries, "/hot/soul/rank");
     const out = JSON.parse(call(entry).done.body);
@@ -421,6 +443,7 @@ console.log("\n[7] 四个插件变体体检");
     "/v6/post/recommended",
     "/soul/global/popup/allConfig",
     "/post/relationUser/chatRooms",
+    "/v2/rec/user",
     "/hot/soul/rank",
     "/post/recSquare/subTabResource",
     "/square/pop/window/switch",

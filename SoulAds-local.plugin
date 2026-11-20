@@ -5,6 +5,7 @@
 #!category=去广告
 #!date=2026-11-20
 #!system=ios
+# 更新：v2.1 补充拦截 post.soulapp.cn/v2/rec/user（顶部「猜你喜欢」推荐用户）
 
 # 本地安装：把 SoulAds-local.plugin 和 6 个 .js 一起放进 iCloud Drive/Loon/Script/
 # 插件里的 script-path 是文件名，Loon 会从本地脚本目录读取
@@ -12,6 +13,7 @@
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
 #   语音房推荐：post.soulapp.cn/post/relationUser/chatRooms -> data.userList（30 条「猜你喜欢」）
+#   顶部推荐用户：post.soulapp.cn/v2/rec/user -> position 置 -1（并清空 userList 等字段）
 
 
 [Rule]
@@ -38,7 +40,7 @@ http-response ^https:\/\/post\.soulapp\.cn\/v(5\/post\/homepage|6\/post\/recomme
 http-response ^https:\/\/api-a\.soulapp\.cn\/soul\/global\/popup\/(config|allConfig) script-path=soul-ads-popup.js,requires-body=true,tag=SoulAdsPopup,timeout=10,enable=true
 
 # 5) 运营位 / 推荐位 / 广场弹窗 / 新人入口
-http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|v2\/rec\/user|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
 http-response ^https:\/\/api-user\.soulapp\.cn\/(furion\/position\/(content|refresh)|newUser\/task\/getEntranceState) script-path=soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
 http-response ^https:\/\/api-a\.soulapp\.cn\/show\/square\/topicMatchCard script-path=soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
 
