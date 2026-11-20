@@ -493,6 +493,13 @@ console.log("\n[7] 四个插件变体体检");
     });
   });
 
+  check("插件含 QUIC 拦截规则（强制 Soul 走 TCP）", () => {
+    ["SoulAds.plugin", "SoulAds-local.plugin"].forEach((name) => {
+      const p = fs.readFileSync(path.join(ROOT, name), "utf8");
+      assert(/AND,\(\(DOMAIN-SUFFIX,soulapp\.cn\),\(PROTOCOL,QUIC\)\),REJECT/.test(p), name + " 缺少 QUIC 规则");
+    });
+  });
+
   PLUGINS.forEach((name) => {
     const plugin = fs.readFileSync(path.join(ROOT, name), "utf8");
 

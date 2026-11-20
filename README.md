@@ -18,6 +18,7 @@
 | 开屏兜底 | `guide-position/check` 强制 `allow:false`、`startup/policy` 强制 `result:false`、启动落地页置 null | `soul-ads-config.js` |
 | 全页面商业化 banner | apollo 里 `new_commercial_banner_open=false`、清空 banner 页面列表、关掉广告落地页站 | `soul-ads-config.js` |
 | 广告上报/归因 | REJECT `ad-r` / `soul-ad` / `oceanengine` / `qchannel03` / `sofire` / `volceapplog` | 插件 `[Rule]` |
+| 强制走 TCP | `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT`，避免 QUIC 绕过 MITM | 插件 `[Rule]` |
 
 ## 文件结构
 
@@ -145,6 +146,20 @@ Safari 直接打开：
 - **apollo 只动广告键**：`new_commercial_banner_open`、两个 `global_banner_*`、`adStationConf`，其余 400+ 配置键保持不变（测试有校验）。
 - **不碰功能接口**：`loveBell/*`（奇遇铃配置）、官方账号列表、聊天菜单（礼物/好物）、`api-pay`、`MeasureResult`（其实是性格/匹配测试）、Soul 自建埋点都保持原样。
 
+## 排查：开抓包正常、关抓包又出现
+
+「抓包一开就没了，关掉又回来」一般不是脚本逻辑问题，而是关抓包后流量走了另一条路：
+
+1. 抓包开关会重启 Loon 隧道，Soul 会重新加载页面；
+2. 关抓包瞬间隧道还没恢复，页面可能**直连**拉到一份没被脚本改过的数据并缓存；
+3. 或者 Soul 的请求走了 **QUIC（HTTP/3）**，QUIC 不走 MITM，脚本看不到。
+
+本插件已加 `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT` 强制 Soul 走 TCP。更新后：
+
+- **关掉抓包 → 等几秒 → 强杀 Soul（上滑关闭，不是退到后台）→ 重开**，再看关注页；
+- 如果广告回来了，说明脚本整体没生效：检查 Loon 的 MITM 是否常开（不要只在抓包时开）、插件是否启用；
+- 如果广告没回来、只有推荐位回来，说明脚本在跑，但该模块来自缓存或别的接口，需要再定位。
+
 ## 可调项（想恢复某一组时）
 
 - **只恢复语音房推荐**：把插件第 5 组正则里的 `post\/relationUser\/chatRooms|` 删掉，或删 `soul-ads-ops.js` 对应分支。
@@ -155,6 +170,7 @@ Safari 直接打开：
 - **恢复商业化 banner**：删掉插件第 6 组里 `api-ucc.soulapp.cn/app/apollo/config` 那一行。
 - **恢复开屏兜底**：删掉第 6 组里 `guide-position` / `startup/policy` / `landing` 对应行。
 - **不拦归因域名**：删 `[Rule]` 里对应 `DOMAIN,...`。
+- **不拦 QUIC**：删掉 `[Rule]` 里 `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT`（如果 Soul 的通话/直播有异常，优先删这条）。
 
 ## 已知限制
 
@@ -172,4 +188,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、顶部推荐用户、私聊打招呼弹窗、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **48 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、顶部推荐用户、私聊打招呼弹窗、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **49 项全部通过**。

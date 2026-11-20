@@ -1,14 +1,13 @@
 #!name=Soul 去广告（开屏/信息流/推荐位/弹窗）（本地脚本）
-#!desc=v2.3 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
+#!desc=v2.4 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
 #!author=zq
 #!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/Soul.png
 #!category=去广告
 #!date=2026-11-20
 #!system=ios
-# 版本：v2.3（2026-11-20）· 新增私聊打招呼弹窗拦截（chat/limitInfo）；安装地址固定，点更新即可升级
+# 版本：v2.4（2026-11-20）· 新增 QUIC 拦截（强制 Soul 走 TCP，避免关抓包后绕过 MITM）
 
-# 本地安装：把 SoulAds-local.plugin 和 v2.3/ 下 6 个 .js 一起放进 iCloud Drive/Loon/Script/
-# 插件里的 script-path 是文件名，Loon 会从本地脚本目录读取
+# 本地安装：把 SoulAds-local.plugin 和 v2.4/ 下 6 个 .js 一起放进 iCloud Drive/Loon/Script/
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
@@ -26,6 +25,8 @@ DOMAIN,i.qchannel03.cn,REJECT
 DOMAIN,sofire.baidu.com,REJECT
 DOMAIN,toblog.volceapplog.com,REJECT
 DOMAIN,klink.volceapplog.com,REJECT
+# 强制 Soul 走 TCP：关掉抓包后推荐位又出现，通常是 QUIC 直连绕过了 MITM
+AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT
 
 [Script]
 # 1) 开屏 + 各类信息流广告：直接回一份 cnt=0 的空广告响应
