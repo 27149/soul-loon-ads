@@ -25,6 +25,7 @@ soul-loon-ads/                  # https://github.com/27149/soul-loon-ads
 ├── SoulAds.plugin            # 远程脚本版（raw.githubusercontent）
 ├── SoulAds-jsdelivr.plugin   # 远程脚本版（fastly.jsdelivr.net，国内推荐）
 ├── SoulAds-ghproxy.plugin    # 远程脚本版（ghproxy 备用）
+├── SoulAds-v2.1.plugin       # 固定版本 v2.1（tag，内容不变，推荐）
 ├── SoulAds-local.plugin      # 本地脚本版（script-path 用文件名）
 ├── soul-ads-ssp.js           # 开屏/信息流广告 SSP 拦截（请求级短路）
 ├── soul-ads-follow.js        # 关注页顶部推荐人
@@ -87,15 +88,16 @@ Loon → 配置 → 插件 → 右上角 `+` → 从 URL 添加，粘贴下面�
 
 | 线路 | 插件地址 | 说明 |
 | --- | --- | --- |
+| **jsDelivr 固定版（推荐）** | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@v2.1/SoulAds-v2.1.plugin` | 对应 git tag `v2.1`，不会被 `@main` 的 CDN 缓存拖旧 |
+| jsDelivr 最新版 | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin` | 跟随 main，但 jsDelivr 各节点缓存可能延迟 |
 | GitHub raw（原生） | `https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds.plugin` | 最"GitHub"，但国内网络经常连不上 raw |
-| jsDelivr（推荐） | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin` | 实测这台机器可访问（`cdn.jsdelivr.net` 反而不通） |
-| ghproxy（备用） | `https://ghproxy.net/https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds-ghproxy.plugin` | 第三方加速，仅当上面两条都不行时用 |
+| ghproxy（备用） | `https://ghproxy.net/https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds-ghproxy.plugin` | 第三方加速，不走 CDN 缓存，更新实时 |
 | 本地脚本 | 见"方式二" | 完全不依赖网络拉脚本 |
 
-Safari 直接打开（把对应行的地址 URL-encode 即可）：
+Safari 直接打开：
 
+- `loon://import?plugin=https%3A%2F%2Ffastly.jsdelivr.net%2Fgh%2F27149%2Fsoul-loon-ads%40v2.1%2FSoulAds-v2.1.plugin`
 - `loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2F27149%2Fsoul-loon-ads%2Fmain%2FSoulAds.plugin`
-- `loon://import?plugin=https%3A%2F%2Ffastly.jsdelivr.net%2Fgh%2F27149%2Fsoul-loon-ads%40main%2FSoulAds-jsdelivr.plugin`
 
 这一版的脚本是远程绝对地址，Loon 会自动拉取，**不需要**再往 iCloud 放文件。只需要：
 
@@ -157,4 +159,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **45 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **49 项全部通过**。
