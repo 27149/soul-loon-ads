@@ -3,7 +3,7 @@
 依据：`138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1，Loon 抓包，746 条记录，约 70 秒）
 说明：本抓包里**只有 `ssp.soulapp.cn/api/q` 的响应带广告字段**（`prs/ideaId/adOwnerSignature/cpm`）。其余"广告感"来自运营位、商业化弹窗、推荐模块和追踪域名。
 
-> **状态：A–H 全部已按选择实现**，唯一保留的是 B 组 `loveBell/*` 功能接口（拦了会破坏奇遇铃）。实现见 [README.md](README.md)。
+> **状态：A–H 全部已按选择实现；另加 J（私聊打招呼弹窗）**，唯一保留的是 B 组 `loveBell/*` 功能接口（拦了会破坏奇遇铃）。实现见 [README.md](README.md)。
 
 ---
 
@@ -145,6 +145,16 @@ Meta_AvatarHeadLimitTimeEnd_OverTime_Popup
 
 ---
 
+## J. 私聊「打招呼」弹窗
+
+| 项 | 内容 |
+| --- | --- |
+| 接口 | `GET api-chat.soulapp.cn/chat/limitInfo?pageId=ChatDetail_Main` |
+| 抓包证据 | `limit:true`，配「Ta正好在线…」「想认识你，从一朵花的问候开始」「购买打招呼权益包…」文案 |
+| 性质 | 打招呼/权益包付费引导弹窗 |
+| 屏蔽做法 | `data.limit` 置 `false`（社区去广告脚本同样处理） |
+| 影响 | 进入私聊不再弹这个框；若服务端仍要求送花才能发消息，发送时才会提示 |
+
 ## 最终选择（已实现）
 
 | 组 | 是否实现 | 备注 |
@@ -157,3 +167,4 @@ Meta_AvatarHeadLimitTimeEnd_OverTime_Popup
 | F 开屏兜底 | ✅ | guide-position / startup-policy / landing page |
 | G 广场弹窗 + 新人入口 | ✅ | `popSwitch=0`、新人任务入口置空 |
 | H 广告归因域名 | ✅ | oceanengine / qchannel03 / sofire / volceapplog |
+| J 私聊打招呼弹窗 | ✅ | `chat/limitInfo` 的 `limit` 置 false |

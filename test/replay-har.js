@@ -285,6 +285,20 @@ console.log("\n[5] soul-ads-ops.js  运营位 / 推荐位 / 广场弹窗 / 新�
     assert(out.data.userList.length === 0, "语音房推荐未清空");
   });
 
+  check("私聊打招呼弹窗：limit 置 false，文案字段保留", () => {
+    const body = fs.readFileSync(path.join(ROOT, "test/fixtures/chat-limit-info.json"), "utf8");
+    const before = JSON.parse(body);
+    assert(before.data.limit === true, "fixture 里 limit 应为 true");
+    const r = run({
+      request: { url: "https://api-chat.soulapp.cn/chat/limitInfo?pageId=ChatDetail_Main" },
+      response: { body },
+    });
+    assert(r.done.body !== undefined, "应改写响应");
+    const out = JSON.parse(r.done.body);
+    assert(out.data.limit === false, "limit 未置 false");
+    assert(out.data.title && out.data.title.prefixText, "其它字段被误删");
+  });
+
   check("顶部「猜你喜欢」推荐用户模块：position 置 -1", () => {
     const entry = findEntry(entries, "/v2/rec/user");
     const before = JSON.parse(decodeEntryBody(entry)).data.position;
@@ -434,9 +448,9 @@ console.log("\n[6] soul-ads-config.js  开屏兜底 + 商业化 banner");
 }
 
 // ---------------------------------------------------------------------------
-console.log("\n[7] 五个插件变体体检");
+console.log("\n[7] 四个插件变体体检");
 {
-  const PLUGINS = ["SoulAds.plugin", "SoulAds-jsdelivr.plugin", "SoulAds-ghproxy.plugin", "SoulAds-v2.1.plugin", "SoulAds-local.plugin"];
+  const PLUGINS = ["SoulAds.plugin", "SoulAds-jsdelivr.plugin", "SoulAds-ghproxy.plugin", "SoulAds-local.plugin"];
   const targetUrls = [
     "/api/q",
     "/v5/post/focused",
@@ -457,24 +471,26 @@ console.log("\n[7] 五个插件变体体检");
     "/app/apollo/config",
   ];
 
-  check("版本化脚本目录 v2.2 齐全，且与根目录脚本一致", () => {
-    const dir = path.join(ROOT, "v2.2");
-    assert(fs.existsSync(dir), "缺少 v2.2/ 目录");
+  check("版本化脚本目录齐全，且与根目录脚本一致", () => {
+    const version = fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim();
+    const dir = path.join(ROOT, version);
+    assert(fs.existsSync(dir), "缺少 " + version + "/ 目录");
     ["soul-ads-ssp.js", "soul-ads-follow.js", "soul-ads-feed.js", "soul-ads-popup.js", "soul-ads-ops.js", "soul-ads-config.js"].forEach((f) => {
-      assert(fs.existsSync(path.join(dir, f)), "v2.2/ 缺少 " + f);
+      assert(fs.existsSync(path.join(dir, f)), version + "/ 缺少 " + f);
       const a = fs.readFileSync(path.join(dir, f));
       const b = fs.readFileSync(path.join(ROOT, f));
-      assert(a.equals(b), "v2.2/" + f + " 与根目录脚本不一致");
+      assert(a.equals(b), version + "/" + f + " 与根目录脚本不一致");
     });
   });
 
-  check("主插件描述带版本号 v2.2", () => {
-    const plugin = fs.readFileSync(path.join(ROOT, "SoulAds.plugin"), "utf8");
-    const desc = (plugin.match(/^#!desc=(.+)$/m) || [])[1] || "";
-    assert(desc.indexOf("v2.2") === 0, "SoulAds.plugin 描述不是 v2.2 开头：" + desc.slice(0, 20));
-    const ghp = fs.readFileSync(path.join(ROOT, "SoulAds-ghproxy.plugin"), "utf8");
-    const gdesc = (ghp.match(/^#!desc=(.+)$/m) || [])[1] || "";
-    assert(gdesc.indexOf("v2.2") === 0, "SoulAds-ghproxy.plugin 描述不是 v2.2 开头");
+  check("主插件描述版本号与 VERSION 文件一致", () => {
+    const version = fs.readFileSync(path.join(ROOT, "VERSION"), "utf8").trim();
+    assert(/^v\d+\.\d+$/.test(version), "VERSION 格式异常：" + version);
+    ["SoulAds.plugin", "SoulAds-ghproxy.plugin", "SoulAds-jsdelivr.plugin", "SoulAds-local.plugin"].forEach((name) => {
+      const plugin = fs.readFileSync(path.join(ROOT, name), "utf8");
+      const desc = (plugin.match(/^#!desc=(.+)$/m) || [])[1] || "";
+      assert(desc.indexOf(version) === 0, name + " 描述不是 " + version + " 开头：" + desc.slice(0, 24));
+    });
   });
 
   PLUGINS.forEach((name) => {
@@ -501,7 +517,7 @@ console.log("\n[7] 五个插件变体体检");
 
     check(name + "：MITM 覆盖六个域名", () => {
       const mitm = (plugin.match(/\[MITM\][\s\S]*?hostname\s*=\s*(.+)/) || [])[1] || "";
-      ["ssp.soulapp.cn", "post.soulapp.cn", "api-a.soulapp.cn", "api-user.soulapp.cn", "increase-openapi.soulapp.cn", "api-ucc.soulapp.cn"].forEach((h) => {
+      ["ssp.soulapp.cn", "post.soulapp.cn", "api-a.soulapp.cn", "api-user.soulapp.cn", "increase-openapi.soulapp.cn", "api-ucc.soulapp.cn", "api-chat.soulapp.cn"].forEach((h) => {
         assert(mitm.indexOf(h) !== -1, "MITM 缺少 " + h);
       });
     });
@@ -512,11 +528,12 @@ console.log("\n[7] 五个插件变体体检");
         const m = /^http-(?:request|response)\s+(\S+)/.exec(line);
         if (m) regexes.push(new RegExp(m[1]));
       });
-      assert(regexes.length === 10, "脚本条目应为 10 条，实际 " + regexes.length);
-      targetUrls.forEach((needle) => {
-        const entry = findEntry(entries, needle);
-        const hit = regexes.some((re) => re.test(entry.request.url));
-        assert(hit, "没有正则能命中 " + entry.request.url.split("?")[0]);
+      assert(regexes.length === 11, "脚本条目应为 11 条，实际 " + regexes.length);
+      const realUrls = targetUrls.map((needle) => findEntry(entries, needle).request.url);
+      realUrls.push("https://api-chat.soulapp.cn/chat/limitInfo?pageId=ChatDetail_Main");
+      realUrls.forEach((u) => {
+        const hit = regexes.some((re) => re.test(u));
+        assert(hit, "没有正则能命中 " + u.split("?")[0]);
       });
     });
   });

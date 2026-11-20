@@ -1,0 +1,26 @@
+{
+  "code": 10001,
+  "message": "success",
+  "data": {
+    "packageRemainCount": 0,
+    "abValue": "",
+    "limitPopupStyleCode": 0,
+    "limit": true,
+    "extMsg": "超级星人每天可免费送出5个开聊礼物(活动已结束)",
+    "freeEquityStatus": false,
+    "subMsg": "想认识你，从一朵花的问候开始",
+    "title": {
+      "type": 6,
+      "prefixText": "Ta正好",
+      "suffixText": "现在快去聊聊吧",
+      "icon": "https://china-img.soulapp.cn/admin/2024-09-23/fec17a9f-534b-4179-9548-f9b7c998235c.png",
+      "midText": "在线"
+    },
+    "remainFreeCount": 0,
+    "bottomText": {
+      "text": "购买打招呼权益包，通兑99Soul币以下礼物，更划算",
+      "goldenText": "通兑99Soul币以下礼物，更划算"
+    }
+  },
+  "success": true
+}

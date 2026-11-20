@@ -1,6 +1,6 @@
 # Soul 去广告 Loon 插件
 
-基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)，当前版本 **v2.2**。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
+基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)，当前版本 **v2.3**。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
 
 ## 已实现
 
@@ -9,6 +9,7 @@
 | 开屏 + 信息流广告 | `ssp.soulapp.cn/api/q` 全部回空广告（推荐/关注/同城/主页TA + 开屏） | `soul-ads-ssp.js` |
 | 关注页顶部推荐人 | 清空 `/v5/post/focused` 的 `recUsers` / `recPosts`（兼容 `recUserList` 等字段） | `soul-ads-follow.js` |
 | 顶部「猜你喜欢」推荐用户 | `/v2/rec/user` 的 `position` 置 -1，并清空 `userList/users/recUsers` | `soul-ads-ops.js` |
+| 私聊「打招呼」弹窗 | `chat/limitInfo` 的 `limit` 置 `false` | `soul-ads-ops.js` |
 | 信息流兜底 | 剔除 `postList` 里 `type=AD` / `isAd` / `adInfo` 等广告卡片 | `soul-ads-feed.js` |
 | 弹窗（36/95） | `AD_*` 广告、`UG_*` 增长拉活、`Meta_*` 付费头像、商业化 `VAS_*`、奇遇铃推广卡 | `soul-ads-popup.js` |
 | 语音房推荐 | `post/relationUser/chatRooms` 的 30 条「猜你喜欢」 | `soul-ads-ops.js` |
@@ -27,8 +28,8 @@ soul-loon-ads/                  # https://github.com/27149/soul-loon-ads
 ├── SoulAds-ghproxy.plugin    # 远程脚本版（ghproxy 备用）
 ├── SoulAds-v2.1.plugin       # 旧版固定文件（保留兼容，可忽略）
 ├── SoulAds-local.plugin      # 本地脚本版（script-path 用文件名）
-├── VERSION                   # 当前版本号（v2.2）
-├── v2.2/                     # 版本化脚本目录（插件按版本引用，避免脚本缓存）
+├── VERSION                   # 当前版本号（v2.3）
+├── v2.3/                     # 版本化脚本目录（插件按版本引用，避免脚本缓存；v2.2/ 保留兼容旧安装）
 ├── soul-ads-ssp.js           # 开屏/信息流广告 SSP 拦截（请求级短路）
 ├── soul-ads-follow.js        # 关注页顶部推荐人
 ├── soul-ads-feed.js          # 信息流接口兜底
@@ -75,6 +76,19 @@ POST https://ssp.soulapp.cn/api/q?bi=[...]&bik=32243&pageId=<页面>   (gzip -> 
 ```
 ```
 
+### 私聊「打招呼」弹窗
+
+```json
+// GET api-chat.soulapp.cn/chat/limitInfo?pageId=ChatDetail_Main
+{ "data": { "limit": true, "limitPopupStyleCode": 0,
+  "title": { "prefixText": "Ta正好", "midText": "在线", "suffixText": "现在快去聊聊吧" },
+  "subMsg": "想认识你，从一朵花的问候开始",
+  "extMsg": "超级星人每天可免费送出5个开聊礼物(活动已结束)",
+  "bottomText": { "text": "购买打招呼权益包，通兑99Soul币以下礼物，更划算" } } }
+```
+
+`limit:true` 时客户端弹「打招呼/购买权益包」框；脚本把 `limit` 置 `false`（社区去广告脚本同样处理），其余字段保留。
+
 ### 弹窗 / 运营位 / banner
 
 - `popup/allConfig` 95 个弹窗：`AD_Interstitial`、`AD_Points`、19 个 `UG_*`、5 个 `Meta_*`、`VAS_LoveBell*`、`Social_LoveBellReturnGuideCard` 等。
@@ -99,8 +113,8 @@ Safari 直接打开：
 安装后：
 
 1. **更新**：Loon → 配置 → 插件，在条目上点「更新」即可，**地址不变**，不用删了重装。
-2. **确认版本**：插件描述以 `v2.2 ·` 开头（对应 `#!desc`），注释里也有 `# 版本：v2.2`。
-3. **脚本缓存**：脚本放在版本化目录（本次是 `v2.2/`），插件更新后脚本路径也换新，不会读到旧脚本。
+2. **确认版本**：插件描述以 `v2.3 ·` 开头（对应 `#!desc`），注释里也有 `# 版本：v2.3`。
+3. **脚本缓存**：脚本放在版本化目录（本次是 `v2.3/`），插件更新后脚本路径也换新，不会读到旧脚本。
 4. GitHub Pages 首次发布可能要 1 分钟左右生效；如果打不开，先换 ghproxy 那条。
 
 > 旧地址（`raw.githubusercontent.com/.../SoulAds.plugin`、jsDelivr `@main`、tag `v2.1`）仍然能用，但不再作为主推；`raw` 在国内经常连不上，jsDelivr `@main` 各节点缓存不一致。
@@ -135,6 +149,7 @@ Safari 直接打开：
 
 - **只恢复语音房推荐**：把插件第 5 组正则里的 `post\/relationUser\/chatRooms|` 删掉，或删 `soul-ads-ops.js` 对应分支。
 - **恢复顶部「猜你喜欢」推荐用户**：把第 5 组正则里的 `v2\/rec\/user|` 删掉，或删 `soul-ads-ops.js` 里 `v2/rec/user` 分支。
+- **恢复私聊打招呼弹窗**：删掉插件第 5 组最后那条 `api-chat.../chat/limitInfo`，或删 `soul-ads-ops.js` 里 `chat/limitInfo` 分支。
 - **恢复部分弹窗**：编辑 `soul-ads-popup.js` 顶部的 `REMOVE_PREFIXES`（`AD_`/`UG_`/`META_`）和 `REMOVE_CODES`（精确 bizCode）。例如保留「付费到期提醒」就从 `UG_` 里单独放行 `UG_PaidItemExpireNotice`（需要把前缀判断改成精确列表）。
 - **恢复某个运营位**：从插件第 5 组对应正则里去掉路径，或删 `soul-ads-ops.js` 里那段 `else if`。
 - **恢复商业化 banner**：删掉插件第 6 组里 `api-ucc.soulapp.cn/app/apollo/config` 那一行。
@@ -157,4 +172,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **51 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、顶部推荐用户、私聊打招呼弹窗、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **48 项全部通过**。

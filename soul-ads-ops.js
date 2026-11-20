@@ -3,6 +3,7 @@
  *
  * 类型：Loon http-response 脚本
  * 命中（同一脚本按 path 分支处理）：
+ *   api-chat.soulapp.cn/chat/limitInfo                    私聊「打招呼/购买权益包」弹窗（limit 置 false）
  *   post.soulapp.cn/v2/rec/user                          顶部「猜你喜欢」推荐用户模块
  *   post.soulapp.cn/post/relationUser/chatRooms          语音房「猜你喜欢」推荐（30 条）
  *   post.soulapp.cn/hot/soul/rank                       热 Soul 榜（话题运营榜）
@@ -45,6 +46,15 @@
       data.userList = [];
       changed = true;
       note = "语音房推荐";
+    }
+  } else if (/\/chat\/limitInfo$/.test(path)) {
+    // 进入私聊时的「打招呼 / 购买权益包」弹窗：limit=true 时客户端弹推销框。
+    // 抓包：limit:true + title「Ta正好在线…」+ subMsg「想认识你，从一朵花的问候开始」
+    //       + bottomText「购买打招呼权益包…」；社区脚本的处理也是把 limit 置 false。
+    if (data && typeof data === "object" && data.limit !== false) {
+      data.limit = false;
+      changed = true;
+      note = "私聊打招呼限制弹窗";
     }
   } else if (/\/v2\/rec\/user$/.test(path)) {
     // 关注页/推荐页顶部的「猜你喜欢」推荐用户模块：
