@@ -412,9 +412,9 @@ console.log("\n[6] soul-ads-config.js  开屏兜底 + 商业化 banner");
 }
 
 // ---------------------------------------------------------------------------
-console.log("\n[7] 三个插件变体体检");
+console.log("\n[7] 四个插件变体体检");
 {
-  const PLUGINS = ["SoulAds.plugin", "SoulAds-jsdelivr.plugin", "SoulAds-local.plugin"];
+  const PLUGINS = ["SoulAds.plugin", "SoulAds-jsdelivr.plugin", "SoulAds-ghproxy.plugin", "SoulAds-local.plugin"];
   const targetUrls = [
     "/api/q",
     "/v5/post/focused",

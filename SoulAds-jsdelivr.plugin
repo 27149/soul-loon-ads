@@ -6,13 +6,13 @@
 #!date=2026-11-20
 #!system=ios
 
+# 安装地址：https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin
+# jsDelivr 线路，国内通常比 raw.githubusercontent 更易访问；@main 有缓存，更新可能延迟
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
 #   语音房推荐：post.soulapp.cn/post/relationUser/chatRooms -> data.userList（30 条「猜你喜欢」）
 
-# 安装地址：https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin
-# 备选线路：jsDelivr 在国内通常比 raw.githubusercontent 更容易访问；@main 有缓存，更新可能延迟
 
 [Rule]
 # 广告上报 / 广告素材 / 第三方广告归因（只减少上报，不影响界面）
@@ -26,26 +26,26 @@ DOMAIN,klink.volceapplog.com,REJECT
 
 [Script]
 # 1) 开屏 + 各类信息流广告：直接回一份 cnt=0 的空广告响应
-http-request ^https:\/\/ssp\.soulapp\.cn\/api\/q script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ssp.js,tag=SoulAdsSSP,timeout=5,enable=true
+http-request ^https:\/\/ssp\.soulapp\.cn\/api\/q script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ssp.js,tag=SoulAdsSSP,timeout=5,enable=true
 
 # 2) 关注页顶部推荐人：清空 recUsers / recPosts
-http-response ^https:\/\/post\.soulapp\.cn\/v5\/post\/focused script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-follow.js,requires-body=true,tag=SoulAdsFollow,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/v5\/post\/focused script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-follow.js,requires-body=true,tag=SoulAdsFollow,timeout=10,enable=true
 
 # 3) 信息流接口兜底：剔除 type=AD / isAd / adInfo 之类的广告卡片
-http-response ^https:\/\/post\.soulapp\.cn\/v(5\/post\/homepage|6\/post\/recommended) script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-feed.js,requires-body=true,tag=SoulAdsFeed,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/v(5\/post\/homepage|6\/post\/recommended) script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-feed.js,requires-body=true,tag=SoulAdsFeed,timeout=10,enable=true
 
 # 4) 全局弹窗：AD_ 广告、UG_ 增长、Meta_ 付费、VAS 商业化/召回、奇遇铃推广卡
-http-response ^https:\/\/api-a\.soulapp\.cn\/soul\/global\/popup\/(config|allConfig) script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-popup.js,requires-body=true,tag=SoulAdsPopup,timeout=10,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/soul\/global\/popup\/(config|allConfig) script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-popup.js,requires-body=true,tag=SoulAdsPopup,timeout=10,enable=true
 
 # 5) 运营位 / 推荐位 / 广场弹窗 / 新人入口
-http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
-http-response ^https:\/\/api-user\.soulapp\.cn\/(furion\/position\/(content|refresh)|newUser\/task\/getEntranceState) script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
-http-response ^https:\/\/api-a\.soulapp\.cn\/show\/square\/topicMatchCard script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/api-user\.soulapp\.cn\/(furion\/position\/(content|refresh)|newUser\/task\/getEntranceState) script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/show\/square\/topicMatchCard script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
 
 # 6) 开屏兜底 + 全页面商业化 banner 开关
-http-response ^https:\/\/api-a\.soulapp\.cn\/(api\/open\/guide-position\/check|app\/landing\/page\/get) script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
-http-response ^https:\/\/increase-openapi\.soulapp\.cn\/increase\/startup\/policy script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
-http-response ^https:\/\/api-ucc\.soulapp\.cn\/app\/apollo\/config script-path=https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/(api\/open\/guide-position\/check|app\/landing\/page\/get) script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/increase-openapi\.soulapp\.cn\/increase\/startup\/policy script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/api-ucc\.soulapp\.cn\/app\/apollo\/config script-path=https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
 
 [MITM]
 hostname = ssp.soulapp.cn, post.soulapp.cn, api-a.soulapp.cn, api-user.soulapp.cn, increase-openapi.soulapp.cn, api-ucc.soulapp.cn

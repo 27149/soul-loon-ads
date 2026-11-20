@@ -6,13 +6,13 @@
 #!date=2026-11-20
 #!system=ios
 
+# 本地安装：把 SoulAds-local.plugin 和 6 个 .js 一起放进 iCloud Drive/Loon/Script/
+# 插件里的 script-path 是文件名，Loon 会从本地脚本目录读取
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
 #   语音房推荐：post.soulapp.cn/post/relationUser/chatRooms -> data.userList（30 条「猜你喜欢」）
 
-# 本地安装：把 SoulAds-local.plugin 和 6 个 .js 一起放进 iCloud Drive/Loon/Script/
-# 插件里的 script-path 是文件名，Loon 会从本地脚本目录读取
 
 [Rule]
 # 广告上报 / 广告素材 / 第三方广告归因（只减少上报，不影响界面）

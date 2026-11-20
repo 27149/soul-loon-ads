@@ -21,8 +21,9 @@
 
 ```
 soul-loon-ads/                  # https://github.com/27149/soul-loon-ads
-├── SoulAds.plugin            # 远程脚本版（raw.githubusercontent 绝对地址）
-├── SoulAds-jsdelivr.plugin   # 备选线路（jsDelivr 绝对地址）
+├── SoulAds.plugin            # 远程脚本版（raw.githubusercontent）
+├── SoulAds-jsdelivr.plugin   # 远程脚本版（fastly.jsdelivr.net，国内推荐）
+├── SoulAds-ghproxy.plugin    # 远程脚本版（ghproxy 备用）
 ├── SoulAds-local.plugin      # 本地脚本版（script-path 用文件名）
 ├── soul-ads-ssp.js           # 开屏/信息流广告 SSP 拦截（请求级短路）
 ├── soul-ads-follow.js        # 关注页顶部推荐人
@@ -79,21 +80,23 @@ POST https://ssp.soulapp.cn/api/q?bi=[...]&bik=32243&pageId=<页面>   (gzip -> 
 
 Loon → 配置 → 插件 → 右上角 `+` → 从 URL 添加，粘贴下面任意一条：
 
-| 线路 | 插件地址 |
-| --- | --- |
-| GitHub raw（实时） | `https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds.plugin` |
-| jsDelivr（国内通常更稳） | `https://cdn.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin` |
+| 线路 | 插件地址 | 说明 |
+| --- | --- | --- |
+| GitHub raw（原生） | `https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds.plugin` | 最"GitHub"，但国内网络经常连不上 raw |
+| jsDelivr（推荐） | `https://fastly.jsdelivr.net/gh/27149/soul-loon-ads@main/SoulAds-jsdelivr.plugin` | 实测这台机器可访问（`cdn.jsdelivr.net` 反而不通） |
+| ghproxy（备用） | `https://ghproxy.net/https://raw.githubusercontent.com/27149/soul-loon-ads/main/SoulAds-ghproxy.plugin` | 第三方加速，仅当上面两条都不行时用 |
+| 本地脚本 | 见"方式二" | 完全不依赖网络拉脚本 |
 
-Safari 直接打开也可以：
+Safari 直接打开（把对应行的地址 URL-encode 即可）：
 
 - `loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2F27149%2Fsoul-loon-ads%2Fmain%2FSoulAds.plugin`
-- `loon://import?plugin=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F27149%2Fsoul-loon-ads%40main%2FSoulAds-jsdelivr.plugin`
+- `loon://import?plugin=https%3A%2F%2Ffastly.jsdelivr.net%2Fgh%2F27149%2Fsoul-loon-ads%40main%2FSoulAds-jsdelivr.plugin`
 
 这一版的脚本是远程绝对地址，Loon 会自动拉取，**不需要**再往 iCloud 放文件。只需要：
 
 1. Loon 安装并信任证书，打开 MITM（HTTPS 解密必需）。
 2. 确认 Soul 流量走 Loon（规则模式命中代理，或临时全局代理）。
-3. 更新：raw 线路实时生效；jsDelivr 的 `@main` 有缓存，脚本改动后可能要等缓存过期或改用 raw。
+3. 更新：raw 线路实时生效；jsDelivr 的 `@main` 有缓存（约 12 小时），脚本改动后可访问 `https://purge.jsdelivr.net/gh/27149/soul-loon-ads@main/` 刷新，或改用 raw。
 
 > 如果 raw 和 jsDelivr 都访问不了，可以装 `ghproxy` 之类的加速，或改用下面的本地方式。
 
@@ -148,4 +151,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **39 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **43 项全部通过**。
