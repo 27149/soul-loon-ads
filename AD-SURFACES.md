@@ -168,3 +168,4 @@ Meta_AvatarHeadLimitTimeEnd_OverTime_Popup
 | G 广场弹窗 + 新人入口 | ✅ | `popSwitch=0`、新人任务入口置空 |
 | H 广告归因域名 | ✅ | oceanengine / qchannel03 / sofire / volceapplog |
 | J 私聊打招呼弹窗 | ✅ | `chat/limitInfo` 的 `limit` 置 false |
+| K Soul 直连 | ✅ | `DOMAIN-SUFFIX,soulapp.cn,DIRECT`，修正 IP 地区识别 |

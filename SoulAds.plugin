@@ -1,14 +1,14 @@
 #!name=Soul 去广告（开屏/信息流/推荐位/弹窗）
-#!desc=v2.4 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
+#!desc=v2.5 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
 #!author=zq
 #!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/Soul.png
 #!category=去广告
 #!date=2026-11-20
 #!system=ios
-# 版本：v2.4（2026-11-20）· 新增 QUIC 拦截（强制 Soul 走 TCP，避免关抓包后绕过 MITM）
+# 版本：v2.5（2026-11-20）· 回退 QUIC 逻辑规则（会导致插件加载失败）；Soul 域名走直连以修正 IP 地区
 
 # 安装地址（固定）：https://27149.github.io/soul-loon-ads/SoulAds.plugin
-# 更新：点「更新」即可；版本号看 #!desc（v2.4）
+# 更新：点「更新」即可；版本号看 #!desc（v2.5）
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
@@ -19,6 +19,8 @@
 
 [Rule]
 # 广告上报 / 广告素材 / 第三方广告归因（只减少上报，不影响界面）
+# Soul 走直连：避免代理出口 IP 被 Soul 判定成日本/其它地区（不需要可删这一行；DIRECT 不影响 MITM 和脚本）
+DOMAIN-SUFFIX,soulapp.cn,DIRECT
 DOMAIN,ad-r.soulapp.cn,REJECT
 DOMAIN,soul-ad.soulapp.cn,REJECT
 DOMAIN,analytics.oceanengine.com,REJECT
@@ -26,32 +28,30 @@ DOMAIN,i.qchannel03.cn,REJECT
 DOMAIN,sofire.baidu.com,REJECT
 DOMAIN,toblog.volceapplog.com,REJECT
 DOMAIN,klink.volceapplog.com,REJECT
-# 强制 Soul 走 TCP：关掉抓包后推荐位又出现，通常是 QUIC 直连绕过了 MITM
-AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT
 
 [Script]
 # 1) 开屏 + 各类信息流广告：直接回一份 cnt=0 的空广告响应
-http-request ^https:\/\/ssp\.soulapp\.cn\/api\/q script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-ssp.js,tag=SoulAdsSSP,timeout=5,enable=true
+http-request ^https:\/\/ssp\.soulapp\.cn\/api\/q script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-ssp.js,tag=SoulAdsSSP,timeout=5,enable=true
 
 # 2) 关注页顶部推荐人：清空 recUsers / recPosts
-http-response ^https:\/\/post\.soulapp\.cn\/v5\/post\/focused script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-follow.js,requires-body=true,tag=SoulAdsFollow,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/v5\/post\/focused script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-follow.js,requires-body=true,tag=SoulAdsFollow,timeout=10,enable=true
 
 # 3) 信息流接口兜底：剔除 type=AD / isAd / adInfo 之类的广告卡片
-http-response ^https:\/\/post\.soulapp\.cn\/v(5\/post\/homepage|6\/post\/recommended) script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-feed.js,requires-body=true,tag=SoulAdsFeed,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/v(5\/post\/homepage|6\/post\/recommended) script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-feed.js,requires-body=true,tag=SoulAdsFeed,timeout=10,enable=true
 
 # 4) 全局弹窗：AD_ 广告、UG_ 增长、Meta_ 付费、VAS 商业化/召回、奇遇铃推广卡
-http-response ^https:\/\/api-a\.soulapp\.cn\/soul\/global\/popup\/(config|allConfig) script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-popup.js,requires-body=true,tag=SoulAdsPopup,timeout=10,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/soul\/global\/popup\/(config|allConfig) script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-popup.js,requires-body=true,tag=SoulAdsPopup,timeout=10,enable=true
 
 # 5) 运营位 / 推荐位 / 广场弹窗 / 新人入口
-http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|v2\/rec\/user|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
-http-response ^https:\/\/api-user\.soulapp\.cn\/(furion\/position\/(content|refresh)|newUser\/task\/getEntranceState) script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
-http-response ^https:\/\/api-a\.soulapp\.cn\/show\/square\/topicMatchCard script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
-http-response ^https:\/\/api-chat\.soulapp\.cn\/chat\/limitInfo script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/post\.soulapp\.cn\/(post\/relationUser\/chatRooms|v2\/rec\/user|hot\/soul\/rank|post\/recSquare\/subTabResource|square\/pop\/window\/switch|tags\/location\/info\/v2) script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/api-user\.soulapp\.cn\/(furion\/position\/(content|refresh)|newUser\/task\/getEntranceState) script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/show\/square\/topicMatchCard script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
+http-response ^https:\/\/api-chat\.soulapp\.cn\/chat\/limitInfo script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-ops.js,requires-body=true,tag=SoulAdsOps,timeout=10,enable=true
 
 # 6) 开屏兜底 + 全页面商业化 banner 开关
-http-response ^https:\/\/api-a\.soulapp\.cn\/(api\/open\/guide-position\/check|app\/landing\/page\/get) script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
-http-response ^https:\/\/increase-openapi\.soulapp\.cn\/increase\/startup\/policy script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
-http-response ^https:\/\/api-ucc\.soulapp\.cn\/app\/apollo\/config script-path=https://27149.github.io/soul-loon-ads/v2.4/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/api-a\.soulapp\.cn\/(api\/open\/guide-position\/check|app\/landing\/page\/get) script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/increase-openapi\.soulapp\.cn\/increase\/startup\/policy script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
+http-response ^https:\/\/api-ucc\.soulapp\.cn\/app\/apollo\/config script-path=https://27149.github.io/soul-loon-ads/v2.5/soul-ads-config.js,requires-body=true,tag=SoulAdsConfig,timeout=15,enable=true
 
 [MITM]
 hostname = ssp.soulapp.cn, post.soulapp.cn, api-a.soulapp.cn, api-user.soulapp.cn, increase-openapi.soulapp.cn, api-ucc.soulapp.cn, api-chat.soulapp.cn

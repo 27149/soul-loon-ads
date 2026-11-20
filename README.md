@@ -1,6 +1,6 @@
 # Soul 去广告 Loon 插件
 
-基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)，当前版本 **v2.3**。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
+基于抓包 `138_1795138963254.har`（Soul 6.35.0 / iOS 27.0.1）写的 Loon 插件，仓库：[27149/soul-loon-ads](https://github.com/27149/soul-loon-ads)，当前版本 **v2.5**。抓包依据和每组可选项见 [AD-SURFACES.md](AD-SURFACES.md)。
 
 ## 已实现
 
@@ -18,7 +18,7 @@
 | 开屏兜底 | `guide-position/check` 强制 `allow:false`、`startup/policy` 强制 `result:false`、启动落地页置 null | `soul-ads-config.js` |
 | 全页面商业化 banner | apollo 里 `new_commercial_banner_open=false`、清空 banner 页面列表、关掉广告落地页站 | `soul-ads-config.js` |
 | 广告上报/归因 | REJECT `ad-r` / `soul-ad` / `oceanengine` / `qchannel03` / `sofire` / `volceapplog` | 插件 `[Rule]` |
-| 强制走 TCP | `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT`，避免 QUIC 绕过 MITM | 插件 `[Rule]` |
+| Soul 直连 | `DOMAIN-SUFFIX,soulapp.cn,DIRECT`，避免代理出口 IP 被识别成日本/其它地区（不影响 MITM 和脚本） | 插件 `[Rule]` |
 
 ## 文件结构
 
@@ -29,8 +29,8 @@ soul-loon-ads/                  # https://github.com/27149/soul-loon-ads
 ├── SoulAds-ghproxy.plugin    # 远程脚本版（ghproxy 备用）
 ├── SoulAds-v2.1.plugin       # 旧版固定文件（保留兼容，可忽略）
 ├── SoulAds-local.plugin      # 本地脚本版（script-path 用文件名）
-├── VERSION                   # 当前版本号（v2.3）
-├── v2.3/                     # 版本化脚本目录（插件按版本引用，避免脚本缓存；v2.2/ 保留兼容旧安装）
+├── VERSION                   # 当前版本号（v2.5）
+├── v2.5/                     # 版本化脚本目录（插件按版本引用，避免脚本缓存；旧版本目录保留兼容）
 ├── soul-ads-ssp.js           # 开屏/信息流广告 SSP 拦截（请求级短路）
 ├── soul-ads-follow.js        # 关注页顶部推荐人
 ├── soul-ads-feed.js          # 信息流接口兜底
@@ -114,8 +114,8 @@ Safari 直接打开：
 安装后：
 
 1. **更新**：Loon → 配置 → 插件，在条目上点「更新」即可，**地址不变**，不用删了重装。
-2. **确认版本**：插件描述以 `v2.3 ·` 开头（对应 `#!desc`），注释里也有 `# 版本：v2.3`。
-3. **脚本缓存**：脚本放在版本化目录（本次是 `v2.3/`），插件更新后脚本路径也换新，不会读到旧脚本。
+2. **确认版本**：插件描述以 `v2.5 ·` 开头（对应 `#!desc`），注释里也有 `# 版本：v2.5`。
+3. **脚本缓存**：脚本放在版本化目录（本次是 `v2.5/`），插件更新后脚本路径也换新，不会读到旧脚本。
 4. GitHub Pages 首次发布可能要 1 分钟左右生效；如果打不开，先换 ghproxy 那条。
 
 > 旧地址（`raw.githubusercontent.com/.../SoulAds.plugin`、jsDelivr `@main`、tag `v2.1`）仍然能用，但不再作为主推；`raw` 在国内经常连不上，jsDelivr `@main` 各节点缓存不一致。
@@ -154,7 +154,7 @@ Safari 直接打开：
 2. 关抓包瞬间隧道还没恢复，页面可能**直连**拉到一份没被脚本改过的数据并缓存；
 3. 或者 Soul 的请求走了 **QUIC（HTTP/3）**，QUIC 不走 MITM，脚本看不到。
 
-本插件已加 `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT` 强制 Soul 走 TCP。更新后：
+> v2.5 已移除 QUIC 逻辑规则（`AND,((...),(PROTOCOL,QUIC)),REJECT` 在部分 Loon 版本上会让整个插件加载失败），改成 `DOMAIN-SUFFIX,soulapp.cn,DIRECT` 直连。
 
 - **关掉抓包 → 等几秒 → 强杀 Soul（上滑关闭，不是退到后台）→ 重开**，再看关注页；
 - 如果广告回来了，说明脚本整体没生效：检查 Loon 的 MITM 是否常开（不要只在抓包时开）、插件是否启用；
@@ -170,7 +170,7 @@ Safari 直接打开：
 - **恢复商业化 banner**：删掉插件第 6 组里 `api-ucc.soulapp.cn/app/apollo/config` 那一行。
 - **恢复开屏兜底**：删掉第 6 组里 `guide-position` / `startup/policy` / `landing` 对应行。
 - **不拦归因域名**：删 `[Rule]` 里对应 `DOMAIN,...`。
-- **不拦 QUIC**：删掉 `[Rule]` 里 `AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT`（如果 Soul 的通话/直播有异常，优先删这条）。
+- **让 Soul 走代理**：删掉 `[Rule]` 里 `DOMAIN-SUFFIX,soulapp.cn,DIRECT`（删掉后 Soul 会跟随你的代理规则，IP 地区可能又变成代理出口）。
 
 ## 已知限制
 
@@ -188,4 +188,4 @@ node test/replay-har.js                     # 默认读 ~/Downloads/138_17951389
 node test/replay-har.js /path/to/xxx.har     # 指定别的 HAR
 ```
 
-把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、顶部推荐用户、私聊打招呼弹窗、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **49 项全部通过**。
+把 HAR 里的真实响应喂给 6 个脚本，覆盖：广告响应替换、关注页 `recUsers`/`recPosts`、顶部推荐用户、私聊打招呼弹窗、信息流广告卡片、36 个弹窗删除且功能弹窗保留、语音房/热榜/运营位/广场弹窗/新人入口/同城 banner、开屏兜底、apollo banner 开关（其它配置不变）、空 body/非法 JSON 不抛错、插件正则命中真实 URL。当前 **50 项全部通过**。

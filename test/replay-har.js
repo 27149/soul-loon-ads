@@ -493,11 +493,16 @@ console.log("\n[7] 四个插件变体体检");
     });
   });
 
-  check("插件含 QUIC 拦截规则（强制 Soul 走 TCP）", () => {
+  check("插件含 Soul 直连规则（修正 IP 地区）", () => {
     ["SoulAds.plugin", "SoulAds-local.plugin"].forEach((name) => {
       const p = fs.readFileSync(path.join(ROOT, name), "utf8");
-      assert(/AND,\(\(DOMAIN-SUFFIX,soulapp\.cn\),\(PROTOCOL,QUIC\)\),REJECT/.test(p), name + " 缺少 QUIC 规则");
+      assert(/DOMAIN-SUFFIX,soulapp\.cn,DIRECT/.test(p), name + " 缺少 DIRECT 规则");
     });
+  });
+
+  check("不再包含 QUIC 逻辑规则（该规则会导致 Loon 插件加载失败）", () => {
+    const p = fs.readFileSync(path.join(ROOT, "SoulAds.plugin"), "utf8");
+    assert(!/PROTOCOL,QUIC/.test(p), "仍残留 QUIC 规则");
   });
 
   PLUGINS.forEach((name) => {

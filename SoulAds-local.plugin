@@ -1,13 +1,13 @@
 #!name=Soul 去广告（开屏/信息流/推荐位/弹窗）（本地脚本）
-#!desc=v2.4 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
+#!desc=v2.5 · 移除 Soul 的开屏、信息流广告（含「壹心理」这类 SSP 广告），清空关注页推荐人、语音房推荐、运营位、商业化 banner、广告/拉活弹窗与私聊打招呼弹窗。
 #!author=zq
 #!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/Soul.png
 #!category=去广告
 #!date=2026-11-20
 #!system=ios
-# 版本：v2.4（2026-11-20）· 新增 QUIC 拦截（强制 Soul 走 TCP，避免关抓包后绕过 MITM）
+# 版本：v2.5（2026-11-20）· 回退 QUIC 逻辑规则（会导致插件加载失败）；Soul 域名走直连以修正 IP 地区
 
-# 本地安装：把 SoulAds-local.plugin 和 v2.4/ 下 6 个 .js 一起放进 iCloud Drive/Loon/Script/
+# 本地安装：把 SoulAds-local.plugin 和 v2.5/ 下 6 个 .js 一起放进 iCloud Drive/Loon/Script/
 # 抓包：Soul 6.35.0（iOS 27.0.1），HAR 138_1795138963254.har
 #   广告素材只在 ssp.soulapp.cn/api/q 下发（开屏 + 推荐/关注/同城/主页TA 信息流）
 #   关注页顶部推荐人：post.soulapp.cn/v5/post/focused -> data.recUsers / data.recPosts
@@ -18,6 +18,8 @@
 
 [Rule]
 # 广告上报 / 广告素材 / 第三方广告归因（只减少上报，不影响界面）
+# Soul 走直连：避免代理出口 IP 被 Soul 判定成日本/其它地区（不需要可删这一行；DIRECT 不影响 MITM 和脚本）
+DOMAIN-SUFFIX,soulapp.cn,DIRECT
 DOMAIN,ad-r.soulapp.cn,REJECT
 DOMAIN,soul-ad.soulapp.cn,REJECT
 DOMAIN,analytics.oceanengine.com,REJECT
@@ -25,8 +27,6 @@ DOMAIN,i.qchannel03.cn,REJECT
 DOMAIN,sofire.baidu.com,REJECT
 DOMAIN,toblog.volceapplog.com,REJECT
 DOMAIN,klink.volceapplog.com,REJECT
-# 强制 Soul 走 TCP：关掉抓包后推荐位又出现，通常是 QUIC 直连绕过了 MITM
-AND,((DOMAIN-SUFFIX,soulapp.cn),(PROTOCOL,QUIC)),REJECT
 
 [Script]
 # 1) 开屏 + 各类信息流广告：直接回一份 cnt=0 的空广告响应
