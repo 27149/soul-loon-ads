@@ -1,7 +1,9 @@
 # Soul 直连规则集（Loon 远程规则）
-# 作用：让 Soul 的域名和 HTTPDNS/IP 直连请求都走直连，避免 IP 属地显示为代理出口
+# 作用：让 Soul 的域名和 IP 直连请求都走直连，避免 IP 属地显示为代理出口
 # 导入时策略选 DIRECT（规则集本身不写策略）
-# 注意：47.110.187.87 是 Soul 的另一台 HTTPDNS，你原有配置里是 REJECT，这里故意不收录
+# 注意：Soul 的两台 HTTPDNS（47.110.187.87、47.56.131.76）不收录在这里，
+#       请在「本地规则」里设为 REJECT，让 App 回退成按域名连接，否则开屏广告脚本可能命中不了：
+#       IP-CIDR,47.110.187.87/32,REJECT,no-resolve
+#       IP-CIDR,47.56.131.76/32,REJECT,no-resolve
 DOMAIN-SUFFIX,soulapp.cn
-IP-CIDR,47.56.131.76/32,no-resolve
 IP-CIDR,47.75.72.47/32,no-resolve
