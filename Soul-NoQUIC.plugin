@@ -1,0 +1,10 @@
+#!name=Soul 关闭 QUIC（让 Soul 走 TCP，保证脚本命中）
+#!desc=屏蔽 QUIC(HTTP/3)，让 App 回退到 TCP，避免「关抓包后推荐位又出现」。独立插件：若你的 Loon 不认这条规则，只会本插件加载失败，不影响 SoulAds 去广告插件。
+#!author=zq
+#!category=去广告
+#!system=ios
+# 安装地址：https://27149.github.io/soul-loon-ads/Soul-NoQUIC.plugin
+# 注意：这条规则是全局的（所有 App 的 QUIC 都会回退到 TCP），不想影响别的 App 请不要装。
+
+[Rule]
+PROTOCOL,QUIC,REJECT

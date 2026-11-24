@@ -10,6 +10,7 @@
  *   post.soulapp.cn/post/recSquare/subTabResource       广场子 tab 运营位
  *   post.soulapp.cn/square/pop/window/switch            广场弹窗总开关
  *   post.soulapp.cn/tags/location/info/v2               同城页头图 banner
+ *   api-user.soulapp.cn/homepage/diamond/position/info  「我」页头像下的服务入口行（Soul币中心/超级星人/个性商城…）整行清空
  *   api-user.soulapp.cn/furion/position/content        运营/引导位
  *   api-user.soulapp.cn/furion/position/refresh        运营/引导位
  *   api-user.soulapp.cn/newUser/task/getEntranceState  新人任务入口
@@ -57,21 +58,21 @@
       note = "私聊打招呼限制弹窗";
     }
   } else if (/\/v2\/rec\/user$/.test(path)) {
-    // 关注页/推荐页顶部的「猜你喜欢」推荐用户模块：
-    // 抓包里返回 {"position":0}，用户列表可能出现在 userList/users/recUsers 等字段，
-    // position 是插入位置，统一置 -1 让客户端不再插模块。
+    // 关注页/推荐页顶部的「猜你喜欢」推荐用户模块。
+    // position 是插入位置，置 -1 让客户端不再插模块；同时把 data 里所有数组字段清空，
+    // 不再依赖具体字段名（服务端偶尔换名）。每次都打一行日志，方便关抓包后在 Loon 日志里核对。
+    try {
+      console.log("[SoulAds] rec/user 原始: " + String(body).slice(0, 300));
+    } catch (e) {}
     if (Array.isArray(json.data)) {
       if (json.data.length > 0) {
         json.data = [];
         changed = true;
-        note = "推荐用户模块";
       }
     } else if (data && typeof data === "object") {
-      var userKeys = ["userList", "users", "recUsers", "recommendUsers", "userInfoList", "list"];
-      for (var uk = 0; uk < userKeys.length; uk++) {
-        var field = userKeys[uk];
-        if (Array.isArray(data[field]) && data[field].length > 0) {
-          data[field] = [];
+      for (var uk in data) {
+        if (Object.prototype.hasOwnProperty.call(data, uk) && Array.isArray(data[uk]) && data[uk].length > 0) {
+          data[uk] = [];
           changed = true;
         }
       }
@@ -79,8 +80,8 @@
         data.position = -1;
         changed = true;
       }
-      note = "推荐用户模块";
     }
+    note = "推荐用户模块";
   } else if (/\/hot\/soul\/rank$/.test(path)) {
     if (Array.isArray(json.data) && json.data.length > 0) {
       json.data = [];
@@ -104,6 +105,14 @@
       delete data.bannerModel;
       changed = true;
       note = "同城头图 banner";
+    }
+  } else if (/\/homepage\/diamond\/position\/info$/.test(path)) {
+    // 「我」页头像下的服务入口行：data 是按钮数组（SOUL_COIN/SUPER_VIP/SHOP/GAME_CENTER…），整行清空。
+    // 访客视角的 guestPosition/info 不在这里，不受影响。
+    if (Array.isArray(json.data) && json.data.length > 0) {
+      json.data = [];
+      changed = true;
+      note = "「我」页服务入口行";
     }
   } else if (/\/furion\/position\/(content|refresh)$/.test(path)) {
     if (data && (!Array.isArray(data) || data.length > 0)) {
